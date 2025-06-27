@@ -1,9 +1,24 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, UsersRound, UserCheck, GraduationCap, FileText, Shield, AlertTriangle } from "lucide-react"
+import {
+  Users,
+  UsersRound,
+  UserCheck,
+  GraduationCap,
+  FileText,
+  Shield,
+  AlertTriangle,
+} from "lucide-react"
 
 export default function AdminDashboard() {
   const reportesPendientes = 7
@@ -15,6 +30,7 @@ export default function AdminDashboard() {
       icon: Users,
       color: "bg-blue-500 hover:bg-blue-600",
       stats: "180 Alumnos • 18 Docentes • 165 Padres",
+      link: "/manage-users",
     },
     {
       title: "Gestión de Grupos",
@@ -49,39 +65,66 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex justify-center items-center space-x-2 mb-4">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge
+              variant="outline"
+              className="bg-green-50 text-green-700 border-green-200"
+            >
               <Shield className="w-3 h-3 mr-1" />
               Administrador
             </Badge>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">Panel de Administración</h1>
-          <p className="text-gray-600 text-lg">Sistema de Gestión Académica - Escuela Secundaria</p>
+          <h1 className="text-4xl font-bold text-gray-900">
+            Panel de Administración
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Sistema de Gestión Académica - Escuela Secundaria
+          </p>
         </div>
 
+        {/* Funciones principales */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mainFunctions.map((func, index) => (
-            <Card key={index} className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+            <Card
+              key={index}
+              className="hover:shadow-lg transition-all duration-300 cursor-pointer group"
+            >
               <CardHeader className="text-center pb-4">
                 <div
                   className={`w-16 h-16 rounded-full ${func.color} flex items-center justify-center mx-auto mb-4 transition-colors duration-300`}
                 >
                   <func.icon className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-xl group-hover:text-blue-600 transition-colors">{func.title}</CardTitle>
-                <CardDescription className="text-gray-600">{func.description}</CardDescription>
+                <CardTitle className="text-xl group-hover:text-blue-600 transition-colors">
+                  {func.title}
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  {func.description}
+                </CardDescription>
               </CardHeader>
               <CardContent className="text-center">
-                <div className="text-sm text-gray-500 mb-4 border-t pt-4">{func.stats}</div>
-                <Button className="w-full" variant="outline">
-                  Acceder
-                </Button>
+                <div className="text-sm text-gray-500 mb-4 border-t pt-4">
+                  {func.stats}
+                </div>
+                {func.link ? (
+                  <Link href={func.link}>
+                    <Button className="w-full" variant="outline">
+                      Acceder
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button className="w-full" variant="outline" disabled>
+                    Acceder
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
 
+        {/* Alerta de reportes */}
         <Card className="border-amber-200 bg-amber-50">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -90,10 +133,13 @@ export default function AdminDashboard() {
                   <AlertTriangle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-amber-800">Reportes Pendientes por Aprobar</h3>
+                  <h3 className="text-lg font-semibold text-amber-800">
+                    Reportes Pendientes por Aprobar
+                  </h3>
                   <p className="text-amber-700">
-                    Tienes <span className="font-bold">{reportesPendientes}</span> reportes de incidencias que requieren
-                    tu aprobación
+                    Tienes{" "}
+                    <span className="font-bold">{reportesPendientes}</span>{" "}
+                    reportes de incidencias que requieren tu aprobación
                   </p>
                 </div>
               </div>
@@ -104,6 +150,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
+        {/* Footer */}
         <div className="text-center text-gray-500 text-sm border-t pt-6">
           <p>Último acceso: Hoy 08:30 AM • Sistema actualizado</p>
         </div>
