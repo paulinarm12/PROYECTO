@@ -13,17 +13,42 @@ import {
   Search,
   UserPlus,
   GraduationCap,
-  User,
   MoreHorizontal,
   Edit,
   Trash2,
   Shield,
   ArrowLeft,
+  Eye,
+  EyeOff,
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 
 export default function ManageUsers() {
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState("all")
+
+  const [editingUser, setEditingUser] = useState(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    role: "",
+    group: "",
+    status: "",
+    isBlocked: false,
+    username: "",
+    password: "",
+  })
+
+  const [showPassword, setShowPassword] = useState(false)
 
   // Datos simulados - en producción vendrían de la API
   const users = [
@@ -34,6 +59,9 @@ export default function ManageUsers() {
       email: "ethan.carter@example.com",
       group: "2°A",
       status: "Activo",
+      isBlocked: false,
+      username: "ethan.carter",
+      password: "alumno123",
     },
     {
       id: "CA-BENO850101-ABC",
@@ -42,6 +70,9 @@ export default function ManageUsers() {
       email: "olivia.bennett@example.com",
       group: "Matemáticas",
       status: "Activo",
+      isBlocked: false,
+      username: "olivia.bennett",
+      password: "docente456",
     },
     {
       id: "BA-B20241234",
@@ -50,6 +81,9 @@ export default function ManageUsers() {
       email: "noah.thompson@example.com",
       group: "Ethan Carter",
       status: "Activo",
+      isBlocked: false,
+      username: "noah.thompson",
+      password: "padre789",
     },
     {
       id: "B20241567",
@@ -58,6 +92,9 @@ export default function ManageUsers() {
       email: "ava.harper@example.com",
       group: "1°B",
       status: "Activo",
+      isBlocked: true,
+      username: "ava.harper",
+      password: "alumno321",
     },
     {
       id: "CB-FOSL920315-XYZ",
@@ -66,6 +103,9 @@ export default function ManageUsers() {
       email: "liam.foster@example.com",
       group: "Historia",
       status: "Suplente",
+      isBlocked: false,
+      username: "liam.foster",
+      password: "docente654",
     },
   ]
 
@@ -86,6 +126,52 @@ export default function ManageUsers() {
       default:
         return <Badge variant="secondary">{role}</Badge>
     }
+  }
+
+  const handleEditUser = (user) => {
+    setEditingUser(user)
+    setEditForm({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      group: user.group,
+      status: user.status || "Activo",
+      isBlocked: user.isBlocked || false,
+      username: user.username,
+      password: user.password,
+    })
+    setIsEditModalOpen(true)
+  }
+
+  const handleSaveEdit = () => {
+    // Aquí actualizarías los datos en tu base de datos
+    // Por ahora solo actualizamos el estado local
+    const updatedUsers = users.map((user) => (user.id === editingUser.id ? { ...user, ...editForm } : user))
+
+    // En una aplicación real, harías una llamada a la API aquí
+    console.log("Usuario actualizado:", { ...editingUser, ...editForm })
+
+    setIsEditModalOpen(false)
+    setEditingUser(null)
+
+    // Mostrar mensaje de éxito (podrías usar toast aquí)
+    alert("Usuario actualizado correctamente")
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditModalOpen(false)
+    setEditingUser(null)
+    setShowPassword(false)
+    setEditForm({
+      name: "",
+      email: "",
+      role: "",
+      group: "",
+      status: "",
+      isBlocked: false,
+      username: "",
+      password: "",
+    })
   }
 
   const filteredUsers = users.filter((user) => {
@@ -171,7 +257,6 @@ export default function ManageUsers() {
                     <TableHead>Rol</TableHead>
                     <TableHead>ID/Usuario</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Grupo/Materia</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -182,7 +267,6 @@ export default function ManageUsers() {
                       <TableCell>{getRoleBadge(user.role, user.status)}</TableCell>
                       <TableCell className="font-mono text-sm">{user.id}</TableCell>
                       <TableCell className="text-gray-600">{user.email}</TableCell>
-                      <TableCell>{user.group}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -191,7 +275,7 @@ export default function ManageUsers() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditUser(user)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Editar
                             </DropdownMenuItem>
@@ -220,7 +304,7 @@ export default function ManageUsers() {
             <CardDescription>Selecciona el tipo de usuario que deseas registrar</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button className="h-auto p-4 flex flex-col items-center space-y-2 bg-blue-600 hover:bg-blue-700">
                 <GraduationCap className="w-6 h-6" />
                 <span className="font-medium">Agregar Alumno</span>
@@ -231,62 +315,172 @@ export default function ManageUsers() {
                 <span className="font-medium">Agregar Docente</span>
                 <span className="text-xs opacity-90">Registrar nuevo profesor</span>
               </Button>
-              <Button className="h-auto p-4 flex flex-col items-center space-y-2 bg-purple-600 hover:bg-purple-700">
-                <User className="w-6 h-6" />
-                <span className="font-medium">Agregar Padre</span>
-                <span className="text-xs opacity-90">Registrar padre/tutor</span>
-              </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Statistics Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Alumnos</p>
-                  <p className="text-2xl font-bold text-blue-600">180</p>
-                </div>
-                <GraduationCap className="w-8 h-8 text-blue-600" />
+        {/* Modal de Edición */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Editar Usuario</DialogTitle>
+              <DialogDescription>
+                Modifica la información del usuario. Los cambios se guardarán al hacer clic en "Guardar cambios".
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-name" className="text-right">
+                  Nombre
+                </Label>
+                <Input
+                  id="edit-name"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="col-span-3"
+                />
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Docentes</p>
-                  <p className="text-2xl font-bold text-green-600">18</p>
-                </div>
-                <Users className="w-8 h-8 text-green-600" />
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-email" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="col-span-3"
+                />
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Padres</p>
-                  <p className="text-2xl font-bold text-purple-600">165</p>
-                </div>
-                <User className="w-8 h-8 text-purple-600" />
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-role" className="text-right">
+                  Rol
+                </Label>
+                <Select value={editForm.role} onValueChange={(value) => setEditForm({ ...editForm, role: value })}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Seleccionar rol" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Alumno">Alumno</SelectItem>
+                    <SelectItem value="Docente">Docente</SelectItem>
+                    <SelectItem value="Padre">Padre/Tutor</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Cuentas Bloqueadas</p>
-                  <p className="text-2xl font-bold text-red-600">2</p>
+
+              {/* Campo Grupo - Solo para Alumnos y Padres */}
+              {editForm.role !== "Docente" && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-group" className="text-right">
+                    Grupo
+                  </Label>
+                  <Input
+                    id="edit-group"
+                    value={editForm.group}
+                    onChange={(e) => setEditForm({ ...editForm, group: e.target.value })}
+                    className="col-span-3"
+                    placeholder={editForm.role === "Alumno" ? "Ej: 2°A, 3°B" : "Ej: Nombre del hijo"}
+                  />
                 </div>
-                <Shield className="w-8 h-8 text-red-600" />
+              )}
+
+              {/* Estado - Solo para Docentes */}
+              {editForm.role === "Docente" && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-status" className="text-right">
+                    Estado
+                  </Label>
+                  <Select
+                    value={editForm.status}
+                    onValueChange={(value) => setEditForm({ ...editForm, status: value })}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Activo">Activo</SelectItem>
+                      <SelectItem value="Suplente">Suplente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Estado de Bloqueo */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-blocked" className="text-right">
+                  Estado de Cuenta
+                </Label>
+                <Select
+                  value={editForm.isBlocked ? "blocked" : "active"}
+                  onValueChange={(value) => setEditForm({ ...editForm, isBlocked: value === "blocked" })}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Activa</SelectItem>
+                    <SelectItem value="blocked">Bloqueada</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+
+              {/* Separador */}
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium mb-3">Credenciales de Acceso</h4>
+
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-username" className="text-right">
+                    Usuario
+                  </Label>
+                  <Input
+                    id="edit-username"
+                    value={editForm.username}
+                    onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                    className="col-span-3"
+                    placeholder="Nombre de usuario para login"
+                  />
+                </div>
+
+                <div className="grid grid-cols-4 items-center gap-4 mt-3">
+                  <Label htmlFor="edit-password" className="text-right">
+                    Contraseña
+                  </Label>
+                  <div className="col-span-3 relative">
+                    <Input
+                      id="edit-password"
+                      type={showPassword ? "text" : "password"}
+                      value={editForm.password}
+                      onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                      className="pr-10"
+                      placeholder="Contraseña de acceso"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={handleCancelEdit}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSaveEdit}>Guardar cambios</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
