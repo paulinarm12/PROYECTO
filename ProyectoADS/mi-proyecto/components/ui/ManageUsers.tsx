@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -189,10 +190,13 @@ export default function ManageUsers() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="text-gray-600">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver al Dashboard
-            </Button>
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="text-gray-600">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver al Dashboard
+              </Button>
+            </Link>
+
             <div className="h-6 w-px bg-gray-300" />
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               <Shield className="w-3 h-3 mr-1" />
