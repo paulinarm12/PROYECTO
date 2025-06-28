@@ -1,6 +1,6 @@
 "use client"
 
-import ManageUsers from "@/components/ui/ManageUsers"
+import ManageUsers from "@/components/ManageUsers"
 
 export default function Page() {
   return <ManageUsers />

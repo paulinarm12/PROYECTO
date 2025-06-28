@@ -300,27 +300,29 @@ export default function ManageUsers() {
 
         {/* Add User Actions */}
         <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-          <CardHeader>
-            <CardTitle className="flex items-center text-blue-800">
-              <UserPlus className="w-5 h-5 mr-2" />
-              Agregar Nuevos Usuarios
-            </CardTitle>
-            <CardDescription>Selecciona el tipo de usuario que deseas registrar</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button className="h-auto p-4 flex flex-col items-center space-y-2 bg-blue-600 hover:bg-blue-700">
-                <GraduationCap className="w-6 h-6" />
-                <span className="font-medium">Agregar Alumno</span>
-                <span className="text-xs opacity-90">Inscribir nuevo estudiante</span>
-              </Button>
-              <Button className="h-auto p-4 flex flex-col items-center space-y-2 bg-green-600 hover:bg-green-700">
-                <Users className="w-6 h-6" />
-                <span className="font-medium">Agregar Docente</span>
-                <span className="text-xs opacity-90">Registrar nuevo profesor</span>
-              </Button>
-            </div>
-          </CardContent>
+           <CardContent>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Botón Agregar Alumno */}
+      <Link href="/add-student">
+        <button className="w-full h-full bg-blue-600 text-white rounded-xl py-8 text-center hover:bg-blue-700 transition">
+          <div className="flex flex-col items-center">
+            <GraduationCap className="w-6 h-6 mb-2" />
+            <span className="text-lg font-bold">Agregar Alumno</span>
+            <span className="text-sm">Inscribir nuevo estudiante</span>
+          </div>
+        </button>
+      </Link>
+
+      {/* Botón Agregar Docente (puedes cambiar la ruta cuando la tengas) */}
+      <button className="w-full h-full bg-green-600 text-white rounded-xl py-8 text-center hover:bg-green-700 transition">
+        <div className="flex flex-col items-center">
+          <Users className="w-6 h-6 mb-2" />
+          <span className="text-lg font-bold">Agregar Docente</span>
+          <span className="text-sm">Registrar nuevo profesor</span>
+        </div>
+      </button>
+    </div>
+  </CardContent>
         </Card>
 
         {/* Modal de Edición */}
