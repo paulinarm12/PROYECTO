@@ -45,6 +45,7 @@ export default function AdminDashboard() {
       icon: UserCheck,
       color: "bg-purple-500 hover:bg-purple-600",
       stats: "92.5% Promedio • 15 Faltas Justificadas",
+      link: "/attendance-records",
     },
     {
       title: "Gestión de Calificaciones",
