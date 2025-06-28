@@ -535,10 +535,12 @@ export default function ManageGroups() {
                             >
                               {subject.active ? "Activa" : "Inactiva"}
                             </Badge>
+                            <Link href="/edit-subject">
                             <Button size="sm" variant="outline">
                               <Edit className="w-4 h-4 mr-2" />
                               Editar
                             </Button>
+                            </Link>
                           </div>
                         </div>
                       </CardContent>
