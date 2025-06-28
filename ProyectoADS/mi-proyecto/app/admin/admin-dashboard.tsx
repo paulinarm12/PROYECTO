@@ -1,5 +1,4 @@
 "use client"
-
 import Link from "next/link"
 import {
   Card,
@@ -38,6 +37,7 @@ export default function AdminDashboard() {
       icon: UsersRound,
       color: "bg-green-500 hover:bg-green-600",
       stats: "6 Grupos • 24 Materias • 3 Talleres",
+      link: "/manage-groups"
     },
     {
       title: "Gestión de Asistencias",
