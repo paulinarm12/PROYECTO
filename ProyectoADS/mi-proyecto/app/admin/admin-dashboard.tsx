@@ -60,6 +60,7 @@ export default function AdminDashboard() {
       icon: FileText,
       color: "bg-red-500 hover:bg-red-600",
       stats: "12 Reportes este mes • 3 Incidencias graves",
+       link: "/manage-reports?tab=all"
     },
   ]
 
@@ -144,9 +145,11 @@ export default function AdminDashboard() {
                   </p>
                 </div>
               </div>
+              <Link href="/manage-reports?tab=unapproved">
               <Button className="bg-amber-600 hover:bg-amber-700 text-white" size="lg">
                 Revisar Reportes
               </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
