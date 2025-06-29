@@ -3,11 +3,21 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Button } from "@/components/ui/button"
+
 import { Badge } from "@/components/ui/badge"
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
 import { Input } from "@/components/ui/input"
+
 import { Checkbox } from "@/components/ui/checkbox"
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+import { Label } from "@/components/ui/label"
+
 import {
   ArrowLeft,
   UsersRound,
@@ -25,6 +35,8 @@ import {
   Save,
   Search,
   Edit,
+  RefreshCw,
+  Plus,
 } from "lucide-react"
 
 export default function ManageGroups() {
@@ -32,26 +44,31 @@ export default function ManageGroups() {
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false)
   const [isManageSubjectsModalOpen, setIsManageSubjectsModalOpen] = useState(false)
   const [isManageWorkshopsModalOpen, setIsManageWorkshopsModalOpen] = useState(false)
+  const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStudents, setSelectedStudents] = useState<string[]>([])
 
+  // Estados para crear grupo
+  const [newGroupGrade, setNewGroupGrade] = useState("")
+  const [newGroupSection, setNewGroupSection] = useState("")
+
   // Datos simulados
-  const groups = [
+  const [groups, setGroups] = useState([
     { id: "1A", name: "1° A", grade: "1°", section: "A", students: 28 },
     { id: "1B", name: "1° B", grade: "1°", section: "B", students: 30 },
     { id: "2A", name: "2° A", grade: "2°", section: "A", students: 29 },
     { id: "2B", name: "2° B", grade: "2°", section: "B", students: 27 },
     { id: "3A", name: "3° A", grade: "3°", section: "A", students: 26 },
     { id: "3B", name: "3° B", grade: "3°", section: "B", students: 28 },
-  ]
+  ])
 
-  const studentsInGroup = [
+  const [studentsInGroup, setStudentsInGroup] = useState([
     { id: "B20241234", name: "Ethan Harper", boleta: "B20241234", status: "Activo" },
     { id: "B20241567", name: "Olivia Bennett", boleta: "B20241567", status: "Activo" },
     { id: "B20241890", name: "Noah Carter", boleta: "B20241890", status: "Activo" },
     { id: "B20242123", name: "Emma Rodriguez", boleta: "B20242123", status: "Activo" },
     { id: "B20242456", name: "Liam Foster", boleta: "B20242456", status: "Activo" },
-  ]
+  ])
 
   // Estudiantes disponibles por grado
   const availableStudents = {
@@ -99,14 +116,14 @@ export default function ManageGroups() {
   const weekDays = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
 
   // Horario simulado
-  const schedule = {
+  const [schedule, setSchedule] = useState({
     "08:00 - 09:00": ["Matemáticas", "Español", "Historia", "Ciencias", "Inglés"],
     "09:00 - 10:00": ["Español", "Matemáticas", "Geografía", "Física", "Matemáticas"],
     "10:00 - 11:00": ["Historia", "Ciencias", "Matemáticas", "Español", "Educación Física"],
     "11:00 - 12:00": ["Ciencias", "Historia", "Inglés", "Matemáticas", "Taller"],
     "12:00 - 13:00": ["Geografía", "Inglés", "Educación Física", "Taller", "Historia"],
     "13:00 - 14:00": ["Taller", "Educación Física", "Taller", "Inglés", "Ciencias"],
-  }
+  })
 
   const currentGroup = groups.find((g) => g.id === selectedGroup)
   const currentGroupIndex = groups.findIndex((g) => g.id === selectedGroup)
@@ -150,20 +167,76 @@ export default function ManageGroups() {
     setIsAddStudentModalOpen(false)
   }
 
+  const handleClearGroup = () => {
+    // Vaciar estudiantes del grupo
+    setStudentsInGroup([])
+
+    // Limpiar horario
+    setSchedule({
+      "08:00 - 09:00": ["", "", "", "", ""],
+      "09:00 - 10:00": ["", "", "", "", ""],
+      "10:00 - 11:00": ["", "", "", "", ""],
+      "11:00 - 12:00": ["", "", "", "", ""],
+      "12:00 - 13:00": ["", "", "", "", ""],
+      "13:00 - 14:00": ["", "", "", "", ""],
+    })
+
+    console.log("Grupo limpiado: estudiantes y horario reiniciados")
+  }
+
+  const handleCreateGroup = () => {
+    if (newGroupGrade && newGroupSection) {
+      const newGroupId = `${newGroupGrade.charAt(0)}${newGroupSection}`
+      const newGroup = {
+        id: newGroupId,
+        name: `${newGroupGrade} ${newGroupSection}`,
+        grade: newGroupGrade,
+        section: newGroupSection,
+        students: 0,
+      }
+
+      setGroups([...groups, newGroup])
+      setNewGroupGrade("")
+      setNewGroupSection("")
+      setIsCreateGroupModalOpen(false)
+      console.log("Nuevo grupo creado:", newGroup)
+    }
+  }
+
+  const handleDeleteGroup = () => {
+    if (confirm(`¿Estás seguro de que deseas eliminar el grupo ${currentGroup?.name}?`)) {
+      const updatedGroups = groups.filter((group) => group.id !== selectedGroup)
+      setGroups(updatedGroups)
+
+      // Seleccionar el primer grupo disponible
+      if (updatedGroups.length > 0) {
+        setSelectedGroup(updatedGroups[0].id)
+      }
+
+      console.log("Grupo eliminado:", selectedGroup)
+    }
+  }
+
+  const handleSaveChanges = () => {
+    console.log("Guardando cambios del grupo:", selectedGroup)
+    console.log("Estudiantes:", studentsInGroup)
+    console.log("Horario:", schedule)
+    // Aquí iría la lógica para guardar en la base de datos
+    alert("Cambios guardados exitosamente")
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="mb-4">
-  <Link href="/admin">
-    <Button variant="secondary">
-      <ArrowLeft className="w-4 h-4 mr-2" />
-      Volver al Dashboard
-    </Button>   
-  </Link>
-</div>
+            <Link href="/admin">
+                <Button variant="secondary">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Volver al Dashboard
+                </Button>
+              </Link>
             <div className="h-6 w-px bg-gray-300" />
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               <Shield className="w-3 h-3 mr-1" />
@@ -171,11 +244,17 @@ export default function ManageGroups() {
             </Badge>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
-              Limpiar Grupo
+            <Button
+              variant="outline"
+              className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
+              onClick={handleDeleteGroup}
+              disabled={groups.length <= 1}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Eliminar Grupo
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <UserPlus className="w-4 h-4 mr-2" />
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsCreateGroupModalOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
               Crear Grupo
             </Button>
           </div>
@@ -246,25 +325,41 @@ export default function ManageGroups() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {studentsInGroup.map((student) => (
-                        <TableRow key={student.id}>
-                          <TableCell className="font-medium">{student.name}</TableCell>
-                          <TableCell className="font-mono text-sm">{student.boleta}</TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800">Activo</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Eliminar
-                            </Button>
+                      {studentsInGroup.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center text-gray-500 py-8">
+                            No hay estudiantes asignados a este grupo
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        studentsInGroup.map((student) => (
+                          <TableRow key={student.id}>
+                            <TableCell className="font-medium">{student.name}</TableCell>
+                            <TableCell className="font-mono text-sm">{student.boleta}</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-100 text-green-800">Activo</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => setIsAddStudentModalOpen(true)}>
+                <Button
+                  variant="outline"
+                  className="w-full bg-transparent"
+                  onClick={() => setIsAddStudentModalOpen(true)}
+                >
                   <UserPlus className="w-4 h-4 mr-2" />
                   Agregar Estudiante
                 </Button>
@@ -282,7 +377,7 @@ export default function ManageGroups() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{currentGroup?.students}</div>
+                    <div className="text-2xl font-bold text-blue-600">{studentsInGroup.length}</div>
                     <div className="text-sm text-blue-700">Estudiantes</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -301,12 +396,12 @@ export default function ManageGroups() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Capacidad del grupo</span>
-                    <span>{currentGroup?.students}/30</span>
+                    <span>{studentsInGroup.length}/30</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${((currentGroup?.students || 0) / 30) * 100}%` }}
+                      style={{ width: `${(studentsInGroup.length / 30) * 100}%` }}
                     ></div>
                   </div>
                 </div>
@@ -344,13 +439,14 @@ export default function ManageGroups() {
                         <TableCell className="font-medium text-sm">{hour}</TableCell>
                         {weekDays.map((day, dayIndex) => (
                           <TableCell key={`${hour}-${day}`} className="text-center p-2">
-                            {schedule[hour as keyof typeof schedule] && (
-                              <Badge
-                                className={`text-xs ${getSubjectColor(schedule[hour as keyof typeof schedule][dayIndex])}`}
-                              >
-                                {schedule[hour as keyof typeof schedule][dayIndex]}
-                              </Badge>
-                            )}
+                            {schedule[hour as keyof typeof schedule] &&
+                              schedule[hour as keyof typeof schedule][dayIndex] && (
+                                <Badge
+                                  className={`text-xs ${getSubjectColor(schedule[hour as keyof typeof schedule][dayIndex])}`}
+                                >
+                                  {schedule[hour as keyof typeof schedule][dayIndex]}
+                                </Badge>
+                              )}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -358,7 +454,6 @@ export default function ManageGroups() {
                   </TableBody>
                 </Table>
               </div>
-
               <div className="flex flex-wrap gap-2 justify-center">
                 <Button variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
                   <Calendar className="w-4 h-4 mr-2" />
@@ -381,10 +476,118 @@ export default function ManageGroups() {
                   Gestionar Talleres
                 </Button>
               </div>
+              <div className="flex justify-center gap-4 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  className="text-orange-600 border-orange-200 hover:bg-orange-50 bg-transparent"
+                  onClick={handleClearGroup}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Limpiar Grupo
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-green-600 border-green-200 hover:bg-green-50 bg-transparent"
+                  onClick={handleSaveChanges}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Guardar Cambios
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Modal para Crear Grupo */}
+        {isCreateGroupModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <Plus className="w-6 h-6 mr-2 text-blue-600" />
+                    Crear Nuevo Grupo
+                  </h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setIsCreateGroupModalOpen(false)
+                      setNewGroupGrade("")
+                      setNewGroupSection("")
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="grade">Grado</Label>
+                    <Select value={newGroupGrade} onValueChange={setNewGroupGrade}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona el grado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1°">1° (Primer Grado)</SelectItem>
+                        <SelectItem value="2°">2° (Segundo Grado)</SelectItem>
+                        <SelectItem value="3°">3° (Tercer Grado)</SelectItem>
+                        <SelectItem value="4°">4° (Cuarto Grado)</SelectItem>
+                        <SelectItem value="5°">5° (Quinto Grado)</SelectItem>
+                        <SelectItem value="6°">6° (Sexto Grado)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="section">Sección</Label>
+                    <Select value={newGroupSection} onValueChange={setNewGroupSection}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona la sección" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                        <SelectItem value="D">D</SelectItem>
+                        <SelectItem value="E">E</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {newGroupGrade && newGroupSection && (
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-700">
+                        <strong>Grupo a crear:</strong> {newGroupGrade} {newGroupSection}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-6 border-t mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsCreateGroupModalOpen(false)
+                      setNewGroupGrade("")
+                      setNewGroupSection("")
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCreateGroup}
+                    disabled={!newGroupGrade || !newGroupSection}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crear Grupo
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal para Agregar Estudiantes */}
         {isAddStudentModalOpen && (
@@ -408,7 +611,6 @@ export default function ManageGroups() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4">
                     <div className="flex-1 relative">
@@ -424,7 +626,6 @@ export default function ManageGroups() {
                       Grado: {currentGrade}
                     </Badge>
                   </div>
-
                   <div className="rounded-md border">
                     <Table>
                       <TableHeader>
@@ -469,7 +670,6 @@ export default function ManageGroups() {
                       </TableBody>
                     </Table>
                   </div>
-
                   <div className="flex justify-between items-center pt-4 border-t">
                     <div className="text-sm text-gray-600">{selectedStudents.length} estudiante(s) seleccionado(s)</div>
                     <div className="flex space-x-4">
@@ -513,7 +713,6 @@ export default function ManageGroups() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-
                 <div className="space-y-4">
                   {subjects.map((subject) => (
                     <Card key={subject.id}>
@@ -536,17 +735,16 @@ export default function ManageGroups() {
                               {subject.active ? "Activa" : "Inactiva"}
                             </Badge>
                             <Link href="/edit-subject">
-                            <Button size="sm" variant="outline">
-                              <Edit className="w-4 h-4 mr-2" />
-                              Editar
-                            </Button>
+                              <Button size="sm" variant="outline">
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar
+                              </Button>
                             </Link>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
-
                   <div className="flex justify-end space-x-4 pt-4 border-t">
                     <Button variant="outline" onClick={() => setIsManageSubjectsModalOpen(false)}>
                       Cerrar
@@ -576,7 +774,6 @@ export default function ManageGroups() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-
                 <div className="space-y-4">
                   {workshops.map((workshop) => (
                     <Card key={workshop.id}>
@@ -594,16 +791,17 @@ export default function ManageGroups() {
                             >
                               {workshop.active ? "Activo" : "Inactivo"}
                             </Badge>
-                            <Button size="sm" variant="outline">
-                              <Edit className="w-4 h-4 mr-2" />
-                              Editar
-                            </Button>
+                            <Link href="/edit-subject">
+                              <Button size="sm" variant="outline">
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar
+                              </Button>
+                            </Link>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
-
                   <div className="flex justify-end space-x-4 pt-4 border-t">
                     <Button variant="outline" onClick={() => setIsManageWorkshopsModalOpen(false)}>
                       Cerrar
