@@ -27,11 +27,14 @@ export default function AcademicManagement({ onNavigate }: Props) {
 
   const [editGrade, setEditGrade] = useState("")
 
+  const router = useRouter()
+
   // Estados para gestión de materias y talleres
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false)
   const [subjectSearchTerm, setSubjectSearchTerm] = useState("")
   const [isEditingSubject, setIsEditingSubject] = useState(false)
   const [editingSubject, setEditingSubject] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState("list") // Nuevo estado para controlar la pestaña activa
   const [subjectForm, setSubjectForm] = useState({
     name: "",
     grade: "",
@@ -42,7 +45,6 @@ export default function AcademicManagement({ onNavigate }: Props) {
   // Estados para filtros de materias y talleres
   const [subjectGradeFilter, setSubjectGradeFilter] = useState("all")
   const [subjectTypeFilter, setSubjectTypeFilter] = useState("all")
-  const router = useRouter()
 
   // Datos simulados
 
@@ -295,12 +297,12 @@ export default function AcademicManagement({ onNavigate }: Props) {
         prev.map((record) =>
           record.id === editingRecord.id
             ? {
-              ...record,
+                ...record,
 
-              grade: newGrade,
+                grade: newGrade,
 
-              lastUpdated: new Date().toISOString().split("T")[0],
-            }
+                lastUpdated: new Date().toISOString().split("T")[0],
+              }
             : record,
         ),
       )
@@ -326,6 +328,7 @@ export default function AcademicManagement({ onNavigate }: Props) {
     setIsEditingSubject(false)
     setEditingSubject(null)
     resetSubjectForm()
+    setActiveTab("list") // Reset a la pestaña de lista
     // Reset filtros
     setSubjectSearchTerm("")
     setSubjectGradeFilter("all")
@@ -359,6 +362,7 @@ export default function AcademicManagement({ onNavigate }: Props) {
       }
       setSubjects((prev) => [...prev, newSubject])
       resetSubjectForm()
+      // No cambiar de pestaña para permitir crear múltiples elementos
     }
   }
 
@@ -371,6 +375,7 @@ export default function AcademicManagement({ onNavigate }: Props) {
       type: subject.type,
       hoursPerWeek: subject.hoursPerWeek?.toString() || "",
     })
+    setActiveTab("create") // Cambiar automáticamente a la pestaña del formulario
   }
 
   const handleUpdateSubject = () => {
@@ -379,18 +384,19 @@ export default function AcademicManagement({ onNavigate }: Props) {
         prev.map((subject) =>
           subject.id === editingSubject.id
             ? {
-              ...subject,
-              name: subjectForm.name,
-              grade: subjectForm.grade,
-              type: subjectForm.type,
-              hoursPerWeek: subjectForm.type === "materia" ? Number.parseInt(subjectForm.hoursPerWeek) || 0 : null,
-            }
+                ...subject,
+                name: subjectForm.name,
+                grade: subjectForm.grade,
+                type: subjectForm.type,
+                hoursPerWeek: subjectForm.type === "materia" ? Number.parseInt(subjectForm.hoursPerWeek) || 0 : null,
+              }
             : subject,
         ),
       )
       setIsEditingSubject(false)
       setEditingSubject(null)
       resetSubjectForm()
+      setActiveTab("list") // Volver a la pestaña de lista después de actualizar
     }
   }
 
@@ -428,6 +434,7 @@ export default function AcademicManagement({ onNavigate }: Props) {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Volver al Dashboard
             </Button>
+
             <div className="h-6 w-px bg-gray-300" />
 
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
@@ -690,7 +697,7 @@ export default function AcademicManagement({ onNavigate }: Props) {
                   </Button>
                 </div>
 
-                <Tabs defaultValue="list" className="w-full">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="list">Ver y Buscar</TabsTrigger>
                     <TabsTrigger value="create">Crear Nueva</TabsTrigger>
@@ -888,6 +895,7 @@ export default function AcademicManagement({ onNavigate }: Props) {
                               setIsEditingSubject(false)
                               setEditingSubject(null)
                               resetSubjectForm()
+                              setActiveTab("list") // Volver a la pestaña de lista
                             }}
                           >
                             Cancelar
