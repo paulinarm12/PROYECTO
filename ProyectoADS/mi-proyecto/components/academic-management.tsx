@@ -11,6 +11,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, GraduationCap, Shield, Search, Edit, Trash2, X, Save, BookOpen, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+
+type MateriaXML = {
+  id: string[]
+  nombre: string[]
+  tipo: string[]
+}
 
 interface Props {
   onNavigate: (page: string) => void
@@ -207,36 +214,27 @@ export default function AcademicManagement({ onNavigate }: Props) {
   ])
 
   // Estado para materias y talleres
-  const [subjects, setSubjects] = useState([
-    {
-      id: "1",
-      name: "Matemáticas",
-      grade: "1°",
-      type: "materia",
-      hoursPerWeek: 5,
-    },
-    {
-      id: "2",
-      name: "Ciencias",
-      grade: "2°",
-      type: "materia",
-      hoursPerWeek: 4,
-    },
-    {
-      id: "3",
-      name: "Taller de Arte",
-      grade: "1°",
-      type: "taller",
-      hoursPerWeek: null,
-    },
-    {
-      id: "4",
-      name: "Historia",
-      grade: "3°",
-      type: "materia",
-      hoursPerWeek: 3,
-    },
-  ])
+  const [subjects, setSubjects] = useState<any[]>([])
+
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      const res = await fetch("/api/materias")
+      const data = await res.json()
+
+      const transformed = data.map((item: any) => ({
+        id: item.id[0],
+        name: item.nombre[0],
+        grade: item.grado ? item.grado[0] : "",
+        type: item.tipo[0].toLowerCase(),
+        hoursPerWeek: item.horasPorSemana ? Number(item.horasPorSemana[0]) : null,
+      }))
+
+      setSubjects(transformed)
+    }
+
+    fetchSubjects()
+  }, [])
+
 
   const getGradeColor = (grade: number) => {
     if (grade >= 90) return "bg-green-100 text-green-800"
@@ -297,12 +295,12 @@ export default function AcademicManagement({ onNavigate }: Props) {
         prev.map((record) =>
           record.id === editingRecord.id
             ? {
-                ...record,
+              ...record,
 
-                grade: newGrade,
+              grade: newGrade,
 
-                lastUpdated: new Date().toISOString().split("T")[0],
-              }
+              lastUpdated: new Date().toISOString().split("T")[0],
+            }
             : record,
         ),
       )
@@ -351,20 +349,28 @@ export default function AcademicManagement({ onNavigate }: Props) {
     }))
   }
 
-  const handleCreateSubject = () => {
-    if (subjectForm.name && subjectForm.grade && subjectForm.type) {
-      const newSubject = {
-        id: Date.now().toString(),
-        name: subjectForm.name,
-        grade: subjectForm.grade,
-        type: subjectForm.type,
-        hoursPerWeek: subjectForm.type === "materia" ? Number.parseInt(subjectForm.hoursPerWeek) || 0 : null,
-      }
-      setSubjects((prev) => [...prev, newSubject])
-      resetSubjectForm()
-      // No cambiar de pestaña para permitir crear múltiples elementos
+  const handleCreateSubject = async () => {
+  if (subjectForm.name && subjectForm.grade && subjectForm.type) {
+    const newSubject = {
+      id: Date.now().toString(),
+      name: subjectForm.name,
+      grade: subjectForm.grade,
+      type: subjectForm.type,
+      hoursPerWeek:
+        subjectForm.type === "materia"
+          ? Number.parseInt(subjectForm.hoursPerWeek) || 0
+          : null,
     }
+
+    await fetch("/api/materias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newSubject),
+    })
+    setSubjects((prev) => [...prev, newSubject])
+    resetSubjectForm()
   }
+}
 
   const handleEditSubject = (subject: any) => {
     setIsEditingSubject(true)
@@ -378,45 +384,63 @@ export default function AcademicManagement({ onNavigate }: Props) {
     setActiveTab("create") // Cambiar automáticamente a la pestaña del formulario
   }
 
-  const handleUpdateSubject = () => {
-    if (subjectForm.name && subjectForm.grade && subjectForm.type && editingSubject) {
-      setSubjects((prev) =>
-        prev.map((subject) =>
-          subject.id === editingSubject.id
-            ? {
-                ...subject,
-                name: subjectForm.name,
-                grade: subjectForm.grade,
-                type: subjectForm.type,
-                hoursPerWeek: subjectForm.type === "materia" ? Number.parseInt(subjectForm.hoursPerWeek) || 0 : null,
-              }
-            : subject,
-        ),
-      )
-      setIsEditingSubject(false)
-      setEditingSubject(null)
-      resetSubjectForm()
-      setActiveTab("list") // Volver a la pestaña de lista después de actualizar
+  const handleUpdateSubject = async () => {
+  if (subjectForm.name && subjectForm.grade && subjectForm.type && editingSubject) {
+    const updatedSubject = {
+      id: editingSubject.id,
+      name: subjectForm.name,
+      grade: subjectForm.grade,
+      type: subjectForm.type,
+      hoursPerWeek:
+        subjectForm.type === "materia"
+          ? Number.parseInt(subjectForm.hoursPerWeek) || 0
+          : null,
     }
+
+    // Enviar actualización al backend
+    await fetch(`/api/materias`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedSubject),
+    })
+
+    // Actualizar en el estado local
+    setSubjects((prev) =>
+      prev.map((subject) => (subject.id === editingSubject.id ? updatedSubject : subject))
+    )
+
+    setIsEditingSubject(false)
+    setEditingSubject(null)
+    resetSubjectForm()
+    setActiveTab("list")
   }
+}
 
-  const handleDeleteSubject = (subjectId: string) => {
-    if (window.confirm("¿Está seguro de que desea eliminar esta materia/taller?")) {
-      setSubjects((prev) => prev.filter((subject) => subject.id !== subjectId))
-    }
+  const handleDeleteSubject = async (subjectId: string) => {
+  if (window.confirm("¿Está seguro de que desea eliminar esta materia/taller?")) {
+    // Enviar petición DELETE al backend
+    await fetch(`/api/materias`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: subjectId }),
+    })
+
+    // Eliminar localmente
+    setSubjects((prev) => prev.filter((subject) => subject.id !== subjectId))
   }
+}
 
-  const filteredSubjects = subjects.filter((subject) => {
-    const matchesSearch =
-      subject.name.toLowerCase().includes(subjectSearchTerm.toLowerCase()) ||
-      subject.grade.includes(subjectSearchTerm) ||
-      subject.type.toLowerCase().includes(subjectSearchTerm.toLowerCase())
+const filteredSubjects = subjects.filter((subject) => {
+  const matchesSearch =
+    subject.name.toLowerCase().includes(subjectSearchTerm.toLowerCase()) ||
+    subject.grade.includes(subjectSearchTerm) ||
+    subject.type.toLowerCase().includes(subjectSearchTerm.toLowerCase())
 
-    const matchesGrade = subjectGradeFilter === "all" || subject.grade === subjectGradeFilter
-    const matchesType = subjectTypeFilter === "all" || subject.type === subjectTypeFilter
+  const matchesGrade = subjectGradeFilter === "all" || subject.grade === subjectGradeFilter
+  const matchesType = subjectTypeFilter === "all" || subject.type === subjectTypeFilter
 
-    return matchesSearch && matchesGrade && matchesType
-  })
+  return matchesSearch && matchesGrade && matchesType
+})
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<materias>
+  <materia>
+    <id>2</id>
+    <nombre>Taller de Robótica</nombre>
+    <tipo>taller</tipo>
+    <grado>1°</grado>
+    <horasPorSemana/>
+  </materia>
+  <materia>
+    <id>1751224861705</id>
+    <nombre>Matemáticas</nombre>
+    <tipo>materia</tipo>
+    <grado>3°</grado>
+    <horasPorSemana>7</horasPorSemana>
+  </materia>
+</materias>
