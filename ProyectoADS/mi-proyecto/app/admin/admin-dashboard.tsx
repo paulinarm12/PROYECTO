@@ -48,11 +48,12 @@ export default function AdminDashboard() {
       link: "/attendance-records",
     },
     {
-      title: "Gestión de Calificaciones",
+      title: "Gestión Académica",
       description: "Supervisar el registro y consulta de calificaciones",
       icon: GraduationCap,
       color: "bg-orange-500 hover:bg-orange-600",
       stats: "8.2 Promedio General • 3 Docentes pendientes",
+      link: "gestion-academica",
     },
     {
       title: "Gestión de Reportes",
