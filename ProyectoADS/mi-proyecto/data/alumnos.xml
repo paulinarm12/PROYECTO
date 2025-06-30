@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<alumnos>
+  <alumno boleta="B20241234">
+    <nombre>Alberto</nombre>
+    <apellidos>Rodriguez</apellidos>
+    <email>alberto</email>
+    <grupo>6D</grupo>
+    <direccion>Dirección de ejemplo</direccion>
+    <padecimientos/>
+    <usuario>alberto777</usuario>
+    <contrasena/>
+    <estadoCuenta>Activa</estadoCuenta>
+  </alumno>
+  <alumno boleta="B20253204">
+    <nombre>Esteban</nombre>
+    <apellidos>Rivero</apellidos>
+    <email>maria12@gmail.com</email>
+    <grupo>Sin grupo</grupo>
+    <direccion>Calle Patito UWU</direccion>
+    <padecimientos>Ninguno</padecimientos>
+    <usuario>esteban.rivero</usuario>
+    <contrasena>ERB3204</contrasena>
+    <estadoCuenta>Activa</estadoCuenta>
+  </alumno>
+</alumnos>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<docentes>
+  <docente rfc="BEN0850101">
+    <nombre>Edith</nombre>
+    <apellidos>Bennett</apellidos>
+    <email>olivia.bennett@example.com</email>
+    <telefono>0000000000</telefono>
+    <estadoCuenta>Activa</estadoCuenta>
+    <usuario>olivia.bennett</usuario>
+    <contrasena>CAF0SL920315-XYZ</contrasena>
+    <materias>
+      <materia>Matemáticas</materia>
+      <materia>Inglés</materia>
+    </materias>
+    <talleres/>
+  </docente>
+  <docente rfc="SI5020">
+    <nombre>Israel</nombre>
+    <apellidos>Solano</apellidos>
+    <email>misrockjohn@gmail.com</email>
+    <telefono>55178967567</telefono>
+    <tipo>Titular</tipo>
+    <estadoCuenta>Activa</estadoCuenta>
+    <usuario>misrockjohn</usuario>
+    <contrasena>CA-SI5020-PU1</contrasena>
+    <materias>
+      <materia>Matemáticas</materia>
+      <materia>Español</materia>
+    </materias>
+    <talleres>
+      <taller>Taller de Computación</taller>
+    </talleres>
+  </docente>
+  <docente rfc="RA4613">
+    <nombre>Alberto</nombre>
+    <apellidos>Rivero</apellidos>
+    <email>rodriguezmpau2@gmail.com</email>
+    <telefono>55178967567</telefono>
+    <tipo>Titular</tipo>
+    <estadoCuenta>Activa</estadoCuenta>
+    <usuario>rodriguezmpau2</usuario>
+    <contrasena>CA-RA4613-FSK</contrasena>
+    <materias>
+      <materia>Artes</materia>
+    </materias>
+    <talleres>
+      <taller>Taller de Arte</taller>
+    </talleres>
+  </docente>
+</docentes>

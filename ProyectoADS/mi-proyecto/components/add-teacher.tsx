@@ -39,22 +39,15 @@ export default function AddTeacher() {
     })
 
     // Generar RFC simulado (en producción se calcularía correctamente)
-    const generateRFC = (firstName: string, lastName: string, day: string, month: string, year: string) => {
-        if (!firstName || !lastName || !day || !month || !year) return ""
+    const generateRFC = (firstName: string, lastName: string) => {
+  if (!firstName || !lastName) return ""
+  const f = firstName.trim().toUpperCase()
+  const l = lastName.trim().toUpperCase().split(" ")
+  const initials = (l[0]?.charAt(0) || "") + (l[1]?.charAt(0) || "") + (f.charAt(0) || "")
+  const random = Math.floor(1000 + Math.random() * 9000)
+  return `${initials}${random}`
+}
 
-        const firstNameInitial = firstName.charAt(0).toUpperCase()
-        const lastNameParts = lastName.split(" ")
-        const lastNameInitials =
-            lastNameParts.length >= 2
-                ? lastNameParts[0].substring(0, 2).toUpperCase() + lastNameParts[1].charAt(0).toUpperCase()
-                : lastName.substring(0, 3).toUpperCase()
-
-        const yearShort = year.slice(-2)
-        const monthPadded = month.padStart(2, "0")
-        const dayPadded = day.padStart(2, "0")
-
-        return `${lastNameInitials}${firstNameInitial}${yearShort}${monthPadded}${dayPadded}`
-    }
 
     // Generar contraseña del docente
     const generateTeacherPassword = (rfc: string, teacherType: string) => {
@@ -70,13 +63,8 @@ export default function AddTeacher() {
         return today.toLocaleDateString("es-MX")
     }
 
-    const rfc = generateRFC(
-        formData.firstName,
-        formData.lastName,
-        formData.birthDay,
-        formData.birthMonth,
-        formData.birthYear,
-    )
+    const rfc = generateRFC(formData.firstName, formData.lastName)
+
     const teacherPassword = generateTeacherPassword(rfc, formData.teacherType)
     const registrationDate = getCurrentDate()
 
@@ -118,14 +106,43 @@ export default function AddTeacher() {
         }))
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        console.log("Datos del docente:", {
-            ...formData,
-            rfc,
-            teacherPassword,
-            registrationDate,
-        })
+
+        try {
+            await fetch("/api/docentes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nombre: formData.firstName,
+                    apellidos: formData.lastName,
+                    email: formData.email,
+                    telefono: formData.phone,
+                    tipo: formData.teacherType === "titular" ? "Titular" : "Suplente",
+                    usuario: formData.email.split("@")[0], // puedes ajustar esto
+                    contrasena: teacherPassword,
+                    rfc,
+                    materias: formData.subjects.filter((s) => !s.includes("Taller")),
+                    talleres: formData.subjects.filter((s) => s.includes("Taller")),
+                }),
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("No se pudo guardar el docente")
+                    alert("Docente registrado correctamente.")
+                    window.location.href = "/manage-users"
+                })
+                .catch((err) => {
+                    console.error("Error al registrar docente:", err)
+                    alert("Error al registrar docente.")
+                })
+
+            if (!response.ok) throw new Error("Error al guardar docente")
+
+            alert("Docente registrado correctamente")
+        } catch (error) {
+            console.error("Error al registrar:", error)
+            alert("No se pudo registrar el docente")
+        }
     }
 
     return (
@@ -190,38 +207,7 @@ export default function AddTeacher() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Fecha de Nacimiento *</Label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <Input
-                                            placeholder="DD"
-                                            value={formData.birthDay}
-                                            onChange={(e) => handleInputChange("birthDay", e.target.value)}
-                                            maxLength={2}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <Input
-                                            placeholder="MM"
-                                            value={formData.birthMonth}
-                                            onChange={(e) => handleInputChange("birthMonth", e.target.value)}
-                                            maxLength={2}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <Input
-                                            placeholder="YYYY"
-                                            value={formData.birthYear}
-                                            onChange={(e) => handleInputChange("birthYear", e.target.value)}
-                                            maxLength={4}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -264,18 +250,6 @@ export default function AddTeacher() {
                             <CardDescription>Tipo de docente y materias a impartir</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="teacherType">Tipo de Docente *</Label>
-                                <Select value={formData.teacherType} onValueChange={(value) => handleInputChange("teacherType", value)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Seleccione el tipo de docente" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="titular">Docente Titular</SelectItem>
-                                        <SelectItem value="suplente">Docente Suplente</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
 
                             <div className="space-y-3">
                                 <Label>Materias a Impartir (2-4 materias) *</Label>

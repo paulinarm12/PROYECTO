@@ -66,17 +66,31 @@ export default function AddStudent() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Aquí iría la lógica para enviar los datos al servidor
-    console.log("Datos del estudiante:", {
-      ...formData,
-      studentId,
-      studentPassword,
-      parentUser,
-      parentPassword,
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+
+  try {
+    const response = await fetch("/api/agregar-alumno", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+        studentId,
+        studentPassword,
+        parentUser,
+        parentPassword,
+      }),
     })
+
+    if (!response.ok) throw new Error("No se pudo registrar")
+
+    alert("Alumno registrado correctamente.")
+    router.push("/manage-users")
+  } catch (error) {
+    console.error("Error al registrar:", error)
+    alert("Ocurrió un error al registrar el alumno.")
   }
+}
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

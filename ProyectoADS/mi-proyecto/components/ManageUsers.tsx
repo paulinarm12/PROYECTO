@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import Link from "next/link"
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,75 +41,56 @@ export default function ManageUsers() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editForm, setEditForm] = useState({
     name: "",
+    lastName: "",
     email: "",
     role: "",
     group: "",
+    address: "",
+    conditions: "",
     status: "",
     isBlocked: false,
     username: "",
     password: "",
+    telefono: "",
   })
+
+
 
   const [showPassword, setShowPassword] = useState(false)
 
   // Datos simulados - en producción vendrían de la API
-  const users = [
-    {
-      id: "B20241234",
-      name: "Ethan Carter",
-      role: "Alumno",
-      email: "ethan.carter@example.com",
-      group: "2°A",
-      status: "Activo",
-      isBlocked: false,
-      username: "ethan.carter",
-      password: "alumno123",
-    },
-    {
-      id: "CA-BENO850101-ABC",
-      name: "Olivia Bennett",
-      role: "Docente",
-      email: "olivia.bennett@example.com",
-      group: "Matemáticas",
-      status: "Activo",
-      isBlocked: false,
-      username: "olivia.bennett",
-      password: "docente456",
-    },
-    {
-      id: "BA-B20241234",
-      name: "Noah Thompson",
-      role: "Padre",
-      email: "noah.thompson@example.com",
-      group: "Ethan Carter",
-      status: "Activo",
-      isBlocked: false,
-      username: "noah.thompson",
-      password: "padre789",
-    },
-    {
-      id: "B20241567",
-      name: "Ava Harper",
-      role: "Alumno",
-      email: "ava.harper@example.com",
-      group: "1°B",
-      status: "Activo",
-      isBlocked: true,
-      username: "ava.harper",
-      password: "alumno321",
-    },
-    {
-      id: "CB-FOSL920315-XYZ",
-      name: "Liam Foster",
-      role: "Docente",
-      email: "liam.foster@example.com",
-      group: "Historia",
-      status: "Suplente",
-      isBlocked: false,
-      username: "liam.foster",
-      password: "docente654",
-    },
-  ]
+  const [users, setUsers] = useState([])
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("/api/usuarios")
+        const data = await response.json()
+        if (!Array.isArray(data)) throw new Error("Los datos no son una lista")
+        const mappedUsers = data.map((u) => ({
+          id: u.id,
+          name: u.nombre,
+          lastName: u.apellidos,
+          role: u.rol,
+          email: u.email,
+          group: u.grupo,
+          address: u.direccion || "",
+          conditions: u.padecimientos || "",
+          status: u.estadoCuenta,
+          isBlocked: u.estadoCuenta !== "Activa",
+          username: u.usuario,
+          password: u.contrasena,
+          telefono: u.telefono || "",
+        }))
+
+        setUsers(mappedUsers)
+      } catch (error) {
+        console.error("Error al cargar los usuarios:", error)
+      }
+    }
+
+    fetchUsers()
+  }, [])
 
   const getRoleBadge = (role: string, status?: string) => {
     switch (role) {
@@ -133,31 +115,55 @@ export default function ManageUsers() {
     setEditingUser(user)
     setEditForm({
       name: user.name,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
       group: user.group,
-      status: user.status || "Activo",
+      address: user.address,
+      conditions: user.conditions,
+      status: user.status || "Titular", // ⬅️ Asegúrate que diga status, no group
       isBlocked: user.isBlocked || false,
       username: user.username,
       password: user.password,
+      telefono: user.telefono || "",
     })
-    setIsEditModalOpen(true)
+
+   setIsEditModalOpen(true)
   }
 
-  const handleSaveEdit = () => {
-    // Aquí actualizarías los datos en tu base de datos
-    // Por ahora solo actualizamos el estado local
-    const updatedUsers = users.map((user) => (user.id === editingUser.id ? { ...user, ...editForm } : user))
+  const handleSaveEdit = async () => {
+    try {
+      const response = await fetch("/api/usuarios", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingUser.id,
+          role: editForm.role,
+          name: editForm.name,
+          apellidos: editForm.lastName || "",
+          email: editForm.email,
+          group: editForm.group,
+          status: editForm.status,
+          isBlocked: editForm.isBlocked,
+          username: editForm.username,
+          password: editForm.password, // 👈 se enviará correctamente
+          telefono: editForm.telefono,
+        }),
+      })
 
-    // En una aplicación real, harías una llamada a la API aquí
-    console.log("Usuario actualizado:", { ...editingUser, ...editForm })
+      if (!response.ok) throw new Error("Error en la edición")
 
-    setIsEditModalOpen(false)
-    setEditingUser(null)
-
-    // Mostrar mensaje de éxito (podrías usar toast aquí)
-    alert("Usuario actualizado correctamente")
+      alert("Usuario editado correctamente.")
+      setIsEditModalOpen(false)
+      setEditingUser(null)
+      window.location.reload()
+    } catch (error) {
+      console.error("Error al editar:", error)
+      alert("No se pudo editar el usuario.")
+    }
   }
+
+
 
   const handleCancelEdit = () => {
     setIsEditModalOpen(false)
@@ -166,7 +172,6 @@ export default function ManageUsers() {
     setEditForm({
       name: "",
       email: "",
-      role: "",
       group: "",
       status: "",
       isBlocked: false,
@@ -174,6 +179,32 @@ export default function ManageUsers() {
       password: "",
     })
   }
+
+  const handleDeleteUser = async (user) => {
+    if (!confirm(`¿Estás segura de que quieres eliminar a ${user.name} ${user.lastName}?`)) return
+
+    try {
+      const response = await fetch("/api/usuarios", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: user.id,
+          role: user.role,
+        }),
+      })
+
+      if (!response.ok) throw new Error("Error al eliminar")
+
+      alert("Usuario eliminado correctamente.")
+      // Actualiza la lista
+      setUsers((prev) => prev.filter((u) => u.id !== user.id))
+    } catch (error) {
+      console.error("Error al eliminar:", error)
+      alert("No se pudo eliminar el usuario.")
+    }
+  }
+
+
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -235,9 +266,9 @@ export default function ManageUsers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos los roles</SelectItem>
-                  <SelectItem value="alumno">Alumnos</SelectItem>
-                  <SelectItem value="docente">Docentes</SelectItem>
-                  <SelectItem value="padre">Padres/Tutores</SelectItem>
+                  <SelectItem value="Alumno">Alumno</SelectItem>
+                  <SelectItem value="Docente">Docente</SelectItem>
+                  <SelectItem value="Padre/Tutor">Padre/Tutor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -267,7 +298,7 @@ export default function ManageUsers() {
                 <TableBody>
                   {filteredUsers.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell className="font-medium">{user.name} {user.lastName}</TableCell>
                       <TableCell>{getRoleBadge(user.role, user.status)}</TableCell>
                       <TableCell className="font-mono text-sm">{user.id}</TableCell>
                       <TableCell className="text-gray-600">{user.email}</TableCell>
@@ -280,13 +311,14 @@ export default function ManageUsers() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
+  <Edit className="mr-2 h-4 w-4" />
+  Editar
+</DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteUser(user)}>
                               <Trash2 className="mr-2 h-4 w-4" />
                               Eliminar
                             </DropdownMenuItem>
+
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -351,6 +383,17 @@ export default function ManageUsers() {
               </div>
 
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-telefono" className="text-right">
+                  Teléfono
+                </Label>
+                <Input
+                  id="edit-telefono"
+                  type="tel"
+                  value={editForm.telefono}
+                  onChange={(e) => setEditForm({ ...editForm, telefono: e.target.value })}
+                  className="col-span-3"
+                  placeholder="Número de contacto"
+                />
                 <Label htmlFor="edit-email" className="text-right">
                   Email
                 </Label>
@@ -363,21 +406,6 @@ export default function ManageUsers() {
                 />
               </div>
 
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-role" className="text-right">
-                  Rol
-                </Label>
-                <Select value={editForm.role} onValueChange={(value) => setEditForm({ ...editForm, role: value })}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Seleccionar rol" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Alumno">Alumno</SelectItem>
-                    <SelectItem value="Docente">Docente</SelectItem>
-                    <SelectItem value="Padre">Padre/Tutor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               {/* Campo Grupo - Solo para Alumnos y Padres */}
               {editForm.role !== "Docente" && (
@@ -396,25 +424,6 @@ export default function ManageUsers() {
               )}
 
               {/* Estado - Solo para Docentes */}
-              {editForm.role === "Docente" && (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-status" className="text-right">
-                    Estado
-                  </Label>
-                  <Select
-                    value={editForm.status}
-                    onValueChange={(value) => setEditForm({ ...editForm, status: value })}
-                  >
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Seleccionar estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Activo">Activo</SelectItem>
-                      <SelectItem value="Suplente">Suplente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               {/* Estado de Bloqueo */}
               <div className="grid grid-cols-4 items-center gap-4">
