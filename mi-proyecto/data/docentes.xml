@@ -47,4 +47,21 @@
       <taller>Taller de Arte</taller>
     </talleres>
   </docente>
+  <docente rfc="OS5597">
+    <nombre>Sara</nombre>
+    <apellidos>Olguin</apellidos>
+    <email>saritamiamor@gmail.com</email>
+    <telefono>5512345678</telefono>
+    <tipo>Titular</tipo>
+    <estadoCuenta>Activa</estadoCuenta>
+    <usuario>saritamiamor</usuario>
+    <contrasena>CA-OS5597-BJ5</contrasena>
+    <materias>
+      <materia>Matemáticas</materia>
+      <materia>Biología</materia>
+    </materias>
+    <talleres>
+      <taller>Taller de Música</taller>
+    </talleres>
+  </docente>
 </docentes>
